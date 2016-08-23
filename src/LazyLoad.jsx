@@ -15,6 +15,8 @@ class LazyLoad extends Component {
 
     this.lazyLoadHandler = this.lazyLoadHandler.bind(this);
 
+    this.observer = null;
+
     if (props.throttle > 0) {
       if (props.debounce) {
         this.lazyLoadHandler = debounce(this.lazyLoadHandler, props.throttle);
@@ -36,7 +38,16 @@ class LazyLoad extends Component {
     }
 
     add(window, 'resize', this.lazyLoadHandler);
+    add(window, 'load', this.lazyLoadHandler);
     add(eventNode, 'scroll', this.lazyLoadHandler);
+
+    if ( typeof MutationObserver !== 'undefined' ) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach(() => this.lazyLoadHandler());
+      });
+      observer.observe(document.body, {childList: true, subtree: true});
+      this.observer = observer;
+    }
   }
 
   componentWillReceiveProps() {
@@ -100,7 +111,11 @@ class LazyLoad extends Component {
     const eventNode = this.getEventNode();
 
     remove(window, 'resize', this.lazyLoadHandler);
+    remove(window, 'load', this.lazyLoadHandler);
     remove(eventNode, 'scroll', this.lazyLoadHandler);
+    if (this.observer !== null) {
+      this.observer.disconnect();
+    }
   }
 
   render() {
