@@ -8,14 +8,13 @@ const throttle = require('lodash.throttle');
 
 const parentScroll = require('./utils/parentScroll');
 const inViewport = require('./utils/inViewport');
+const mutationsObserver = require('./utils/mutationsObserver');
 
 class LazyLoad extends Component {
   constructor(props) {
     super(props);
 
     this.lazyLoadHandler = this.lazyLoadHandler.bind(this);
-
-    this.observer = null;
 
     if (props.throttle > 0) {
       if (props.debounce) {
@@ -40,14 +39,7 @@ class LazyLoad extends Component {
     add(window, 'resize', this.lazyLoadHandler);
     add(window, 'load', this.lazyLoadHandler);
     add(eventNode, 'scroll', this.lazyLoadHandler);
-
-    if ( typeof MutationObserver !== 'undefined' ) {
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach(() => this.lazyLoadHandler());
-      });
-      observer.observe(document.body, {childList: true, subtree: true});
-      this.observer = observer;
-    }
+    mutationsObserver.registerCallback(this.lazyLoadHandler);
   }
 
   componentWillReceiveProps() {
@@ -113,9 +105,7 @@ class LazyLoad extends Component {
     remove(window, 'resize', this.lazyLoadHandler);
     remove(window, 'load', this.lazyLoadHandler);
     remove(eventNode, 'scroll', this.lazyLoadHandler);
-    if (this.observer !== null) {
-      this.observer.disconnect();
-    }
+    mutationsObserver.unregisterCallback(this.lazyLoadHandler);
   }
 
   render() {
