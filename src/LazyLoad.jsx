@@ -8,6 +8,7 @@ const throttle = require('lodash.throttle');
 
 const parentScroll = require('./utils/parentScroll');
 const inViewport = require('./utils/inViewport');
+const mutationsObserver = require('./utils/domObserver');
 
 class LazyLoad extends Component {
   constructor(props) {
@@ -36,7 +37,9 @@ class LazyLoad extends Component {
     }
 
     add(window, 'resize', this.lazyLoadHandler);
+    add(window, 'load', this.lazyLoadHandler);
     add(eventNode, 'scroll', this.lazyLoadHandler);
+    mutationsObserver.registerCallback(this.lazyLoadHandler);
   }
 
   componentWillReceiveProps() {
@@ -100,7 +103,9 @@ class LazyLoad extends Component {
     const eventNode = this.getEventNode();
 
     remove(window, 'resize', this.lazyLoadHandler);
+    remove(window, 'load', this.lazyLoadHandler);
     remove(eventNode, 'scroll', this.lazyLoadHandler);
+    mutationsObserver.unregisterCallback(this.lazyLoadHandler);
   }
 
   render() {
