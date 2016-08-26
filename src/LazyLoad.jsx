@@ -8,7 +8,7 @@ const throttle = require('lodash.throttle');
 
 const parentScroll = require('./utils/parentScroll');
 const inViewport = require('./utils/inViewport');
-const mutationsObserver = require('./utils/mutationsObserver');
+const mutationsObserver = require('./utils/domObserver');
 
 class LazyLoad extends Component {
   constructor(props) {
